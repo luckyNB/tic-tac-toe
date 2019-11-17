@@ -17,7 +17,7 @@
    function assigningSymbol(){
      
       symbol=$((RANDOM%2))
-       if [ $symbol -eq $] 
+       if [ $symbol -eq 1 ] 
        then
            playerSymbol='X'
        else
