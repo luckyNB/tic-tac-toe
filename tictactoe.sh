@@ -20,8 +20,10 @@
        if [ $symbol -eq 1 ] 
        then
            playerSymbol='X'
+           echo "player1 plays first "
        else
 	   playerSymbol='O'
+           echo "player2 plays first"
        fi
       echo "Player has got symbol:==>$playerSymbol"
  }
