@@ -29,7 +29,7 @@
       echo "Player has got symbol:==>$playerSymbol"
  }
 	 function displayBoard(){
-      	 echo "r\c 0  1  2"
+      	 echo "r\c 0 1 2"
   echo "0   ${Board[1]} ${Board[2]} ${Board[3]}"
   echo "1   ${Board[4]} ${Board[5]} ${Board[6]}"
   echo "2   ${Board[7]} ${Board[8]} ${Board[9]}"
