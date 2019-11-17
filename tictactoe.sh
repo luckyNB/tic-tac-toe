@@ -7,12 +7,14 @@
    playerSymbol=''
    gamePosition=0
    # TicTacToe Board
-   declare -a Board
+   Board=(. . . . . . . . .)
+  gamestatus=0
 	
  	 function initializingBoard(){
+   Board=(. . . . . . . . .)
           	for((position=1;position<=9;position++))
         	  do
-               		 Board[position]=0            
+               		 Board[position]=$position            
          	 done 	
        }
 
@@ -44,9 +46,40 @@
 		displayBoard	
 } 
 
+checkmatch(){
+   if [ ${Board[$1]} != "." ] && [ ${Board[$1]} == ${Board[$2]} ] && [ ${Board[$2]} == ${Board[$3]} ]; then
+    gamestatus=1
+  fi
+}
+
+checkgame(){
+  checkmatch 1 2 3
+  checkmatch 4 5 6
+  checkmatch 7 8 9
+  checkmatch 3 6 9
+  checkmatch 1 4 7
+  checkmatch 2 5 8
+  checkmatch 1 5 9
+  checkmatch 3 5 7
+}
+
+       function checkingForWinner(){
+	    while [ true ]
+            do
+ 		playingGame
+          	checkgame
+                 if [ $gamestatus -eq 1 ]
+                  then
+                  echo "player won"
+ break
+    fi
+          done
+       	   
+ 	}  
    #function calls
 	initializingBoard
 	assigningSymbol
 	displayBoard
 	playingGame
+	checkingForWinner
 
