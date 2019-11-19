@@ -5,21 +5,15 @@
    declare PLAYER="X"
    #variables
    position=0
-   playerSymbol=""
-   computersSymbol=""
-   gamePosition=0
-   gamestatus=0
-   tossWinner=''
-   horizontal=""
-   diagonal=false
-   vertical=false
    winnerFlag=0
+   possibleWinValue=0
   # TicTacToe Board
    declare -a  Board
-   	tossVisibility=0
-  	counter="false"
-  	gameCount=0
-	toss=0
+   tossVisibility=0
+   counter="false"
+   gameCount=0
+   toss=0
+   verticalWinValue=0
  	 function initializingBoard(){
 	
   	 
@@ -27,7 +21,7 @@
              do
               Board[$position]=""$position       
              done   
-       }
+         }
 
  	  function assigningAndTossingForSymbol(){
      	   	 toss=$((RANDOM%2))
@@ -39,7 +33,7 @@
                 else
                    	echo "computer plays first"
                         playingGame $toss
-               fi
+                fi
 		}
  
    
@@ -55,26 +49,39 @@
  
 
      function playingGame(){
-        gameFlag=$1
-        while [ $counter == "false" ]
-        do
-          displayBoard
-          if [ $gameFlag == 1 ]
-          then
-             echo "players turn now"
-             read -p "Enter cellPosition"  cellPosition
-             if [[ ${Board[$cellPosition]} == $PLAYER || ${Board[$cellPosition]} == $COMPUTER ]]       		
-             then
+            gameFlag=$1
+            while [ $counter == "false" ]
+            do
+	    sleep 2
+            displayBoard
+               if [ $gameFlag == 1 ]
+               then
+                   sleep 1
+                   echo "players turn now"
+                   read -p "Enter cellPosition"  cellPosition
+                   if [[ ${Board[$cellPosition]} == $PLAYER || ${Board[$cellPosition]} == $COMPUTER ]]       		
+                   then
              		echo "slot is alredy fixed Enter another Slot"
              		playingGkame $gameFlag
-             else
+                    else
               		Board[$cellPosition]=$PLAYER
               		checkingForWinner $PLAYER
              		gameFlag=0  
-	    fi
-         else
-           echo "computers turn now"
-           randomCellPosition=$((RANDOM%9+1))
+	            fi
+            else
+                      echo "computers turn now"
+                      sleep 1
+                   #computerWinningFunctionHorizontally $COMPUTER 
+
+    #                   computerWinningFunctionVertically   $COMPUTER                               
+                 #	if [ $possibleWinValue >  0 ]
+                 #	then 
+                  #  		randomCellPosition=$possibleWinValue
+                   # 		possibleWinValue=0
+                 	#echo  $possibleWinValue "this is possible value"
+                    #    else
+ 		          randomCellPosition=$((RANDOM%9+1))
+	             #   fi
    	 	if [[ ${Board[$randomCellPosition]} == $PLAYER || ${Board[$randomCellPosition]} == $COMPUTER ]]
         	then
               			echo "slot is already  fixed"
@@ -92,11 +99,12 @@
     function horizontalCheck(){
                  loopCounter=0
                  position=1
-                 while [  $loopCounter -lt 3 ] 
-                 do
+                 horizontalSymbol=$1
+                   while [  $loopCounter -lt 3 ] 
+                   do
                    
-			if [[ ${Board[$position]} -eq ${Board[$(($position+1))]} && 
-                            ${Board[$(($position+1))]} -eq ${Board[$(($position+2))]} &&  ${Board[$position]} -eq $1 ]]  
+			if [[  ${Board[$position]} == $horizontalSymbol  &&  ${Board[$position]} == ${Board[$(($position+1))]} && 
+                            ${Board[$(($position+1))]} == ${Board[$(($position+2))]}  ]]  
                   	then  
                           displayBoard
 			   exit 0	#break
@@ -108,10 +116,11 @@
 		function verticalWinnerCheck(){
 	 		 loopCounter=0
                  	 position=1
+                        verticalSymbol=$1
   		        while [  $loopCounter -lt 3 ] 
                   	do
-				if [[ ${Board[$position]} -eq ${Board[$(($position+3))]} && 
-                            	${Board[$(($position+3))]} -eq ${Board[$(($position+6))]} && ${Board[$position]} -eq $1 ]]   
+				if [[ ${Board[$position]} == ${Board[$(($position+3))]} && 
+                            	${Board[$(($position+3))]} == ${Board[$(($position+6))]} && ${Board[$position]} == $verticalSymbol ]]   
                   		then 
                                   displayBoard
                                          exit 0  #break #exit;;				 
@@ -124,13 +133,14 @@
 	}
          function diagonalWinnerCheck(){
 	          position=1
-        	   	if [[ ${Board[$position]} -eq ${Board[$(($position+4))]} && 
-                            ${Board[$(($position+4))]} -eq ${Board[$(($position+8))]} &&  ${Board[$position]} -eq  $1 ]] 
+                  diagonalSymbol=$1
+        	   	if [[ ${Board[$position]} == ${Board[$(($position+4))]} && 
+                            ${Board[$(($position+4))]} == ${Board[$(($position+8))]} &&  ${Board[$position]} ==  $verticalSymbol ]] 
                 	then 
                                  displayBoard
 				exit 0
-			elif [[ ${Board[$position+2]} -eq ${Board[$(($position+4))]} && 
-                            ${Board[$(($position+4))]} -eq ${Board[$(($position+6))]} &&  ${Board[$position]} -eq $1 ]]
+			elif [[ ${Board[$position+2]} == ${Board[$(($position+4))]} && 
+                            ${Board[$(($position+4))]} == ${Board[$(($position+6))]} &&  ${Board[$position]} == $verticalSymbol ]]
                   	then 
                         displayBoard
 	 	        exit 0
@@ -155,12 +165,49 @@
   			gameTieCheck
 	}    
       
-           function computerWinningFunction(){
-	
-	   
-	
+           function computerWinningFunctionHorizontally(){
+          
+	 local column=1
+          compWinSymbol=$1         
+	 for((row=1;row<=3;row++))
+         do         
+             if [[  ${Board[$column]} == $compWinSymbol &&  ${Board[$(($column+1))]} == $compWinSymbol  ]]
+             then
+                possibleWinValue=$(($column+2))
+            
+                    
+	     elif [[  ${Board[$column]} == $compWinSymbol &&  ${Board[$(($column+2))]} == $compWinSymbol ]]
+             then
+                  possibleWinValue=$(($column+1))
+          
+             elif [[  ${Board[$(($column+1))]} == $compWinSymbol &&  ${Board[$(($column+2))]} == $compWinSymbol ]]
+             then
+ 	           possibleWinValue=$(($column))
+                 
+             fi        
+             column=$(($column+3))
+	 
+         done
 	}
-
+         function  computerWinningFunctionVertically(){
+                loopCounter=1
+             	position=1
+             	verticalSymbol=$1
+                 while [ $loopCounter -lt 3 ]
+                 do
+                    if [[ ${Board[$position]} == $verticalSymbol && ${Board[$(($position+3))]} == $verticalSymbol ]]
+                    then
+                	     verticalWinValue=$(($position+6))
+                    elif [[ ${Board[$position]} == $verticalSymbol && ${Board[$(($position+6))]} == $verticalSymbol ]]
+                    then
+                     	     verticalWinValue=$(($position+3))
+                   elif [[ ${Board[$(($position+6))]} == $verticalSymbol && ${Board[$(($position+3))]} == $verticalSymbol ]]
+                    then
+                     	     verticalWinValue=$position                 
+                    fi
+                    	    ((loopCounter++))
+                done
+}       
 
            
       #function calls
@@ -168,4 +215,4 @@
 	initializingBoard
 	assigningAndTossingForSymbol
 	displayBoard
-      
+     
