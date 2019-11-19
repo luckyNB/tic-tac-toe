@@ -1,218 +1,245 @@
-#! /bin/bash 
-   #Constants
-   declare MAXBOARDSIZE=9
-   declare COMPUTER="O"
-   declare PLAYER="X"
-   #variables
-   position=0
-   winnerFlag=0
-   possibleWinValue=0
-  # TicTacToe Board
-   declare -a  Board
-   tossVisibility=0
-   counter="false"
-   gameCount=0
-   toss=0
-   verticalWinValue=0
- 	 function initializingBoard(){
-	
-  	 
-             for((position=1;position<=9;position++)) 
-             do
-              Board[$position]=""$position       
-             done   
-         }
+#!/bin/bash
+#FINAL_VARIABLES
+MAX_BOARD_POSITION=9
 
- 	  function assigningAndTossingForSymbol(){
-     	   	 toss=$((RANDOM%2))
-           	tossVisibility=1
-       		if [ $toss -eq 1 ] 
-       		then
-      	         	 echo "player plays first"
-                  	 playingGame $toss
-                else
-                   	echo "computer plays first"
-                        playingGame $toss
-                fi
-		}
- 
-   
 
-	 function displayBoard(){
-                pos=1      		
-		for((position=1;position<=3;position++))
-                do
-                    echo " ${Board[$pos]} ${Board[$(($pos+1))]} ${Board[$(($pos+2))]}"
-  		    pos=$(($pos+3))
-                done
-       	}
- 
+#VARIABLES
+playerPosition=0
+computerPosition=0
+player=''
+computer=''
+nonEmptyBlockCount=1
+computerWinMove=false
 
-     function playingGame(){
-            gameFlag=$1
-            while [ $counter == "false" ]
-            do
-	    sleep 2
-            displayBoard
-               if [ $gameFlag == 1 ]
-               then
-                   sleep 1
-                   echo "players turn now"
-                   read -p "Enter cellPosition"  cellPosition
-                   if [[ ${Board[$cellPosition]} == $PLAYER || ${Board[$cellPosition]} == $COMPUTER ]]       		
-                   then
-             		echo "slot is alredy fixed Enter another Slot"
-             		playingGkame $gameFlag
-                    else
-              		Board[$cellPosition]=$PLAYER
-              		checkingForWinner $PLAYER
-             		gameFlag=0  
-	            fi
-            else
-                      echo "computers turn now"
-                      sleep 1
-                   #computerWinningFunctionHorizontally $COMPUTER 
 
-    #                   computerWinningFunctionVertically   $COMPUTER                               
-                 #	if [ $possibleWinValue >  0 ]
-                 #	then 
-                  #  		randomCellPosition=$possibleWinValue
-                   # 		possibleWinValue=0
-                 	#echo  $possibleWinValue "this is possible value"
-                    #    else
- 		          randomCellPosition=$((RANDOM%9+1))
-	             #   fi
-   	 	if [[ ${Board[$randomCellPosition]} == $PLAYER || ${Board[$randomCellPosition]} == $COMPUTER ]]
-        	then
-              			echo "slot is already  fixed"
-	          		playingGame $gameFlag
-                else
-                  	 Board[$randomCellPosition]=$COMPUTER
-                   	 checkingForWinner $COMPUTER
-                  	 gameFlag=1
-                fi
-           	fi
-                gameCount=$(($gameCount+1))
+
+
+#boolean Flags
+someoneWon=false
+whoPlays=false
+
+
+#BOARD ARRAY
+declare -a Board
+
+
+function initializingBoard()
+{
+	for (( i=1; i<=$MAX_BOARD_POSITION; i++ ))
+	do
+		Board[$i]='-'
 	done
-  	} 
+}
 
-    function horizontalCheck(){
-                 loopCounter=0
-                 position=1
-                 horizontalSymbol=$1
-                   while [  $loopCounter -lt 3 ] 
-                   do
-                   
-			if [[  ${Board[$position]} == $horizontalSymbol  &&  ${Board[$position]} == ${Board[$(($position+1))]} && 
-                            ${Board[$(($position+1))]} == ${Board[$(($position+2))]}  ]]  
-                  	then  
-                          displayBoard
-			   exit 0	#break
+
+function symbolAssignment()
+{
+	firstPlay=$((RANDOM%2))
+
+	if [ $firstPlay -eq 1 ]
+	then
+		whoPlays=true
+		player='X'
+		computer='O'
+		echo "Player symobol : X | Computer symbol : O"
+		echo "Player turn First"
+	else
+		player='O'
+		computer='X'
+		echo "Player symobol : O | Computer symbol : X"
+		echo "Computer turn First"
+	fi
+}
+
+
+
+function displayBoard()
+{
+	echo ""
+	for ((row=1; row<=MAX_BOARD_POSITION; row=$(($row+3)) ))
+	do
+		echo "     |     |      "
+		echo "  ${Board[$row]}  |  ${Board[$row+1]}  |  ${Board[$row+2]}  "
+		echo "_____|_____|_____"
+	done
+	echo ""
+}
+
+
+
+function playerInput()
+{
+	read -p "Enter  slot Number to put $player at Empty slot " playerPosition
+	if [ ${Board[$playerPosition]} == '-' ]
+	then
+		Board[$playerPosition]=$player
+	else
+		echo "Slot alredy fixed please enter another slot"
+		playerInput
+	fi
+	whoPlays=false
+}
+
+function computerInput()
+{
+	rowValue=1
+	columnValue=3
+	leftDiagonalValue=4
+	rightDiagonalValue=2
+	computerWinMove=false
+	echo "Computer is Playing"
+	sleep 1
+	checkWinningMove $rowValue $columnValue $computer
+	checkWinningMove $columnValue $rowValue $computer
+	checkWinningMove $leftDiagonalValue $computer
+	checkWinningMove $rightDiagonalValue $computer
+	if [ $computerWinMove = false ]
+	then
+		computerPosition=$((RANDOM%9+1))
+		if [[ ${Board[$computerPosition]} != '-' ]]
+		then
+			echo "Computer played Wrong move "
+			computerInput
+		else
+			Board[$computerPosition]=$computer
+		fi
+	fi
+	whoPlays=true
+}
+
+
+function checkWinningMove()
+{
+	counter=1
+	if [ $computerWinMove=false ]
+	then
+		for (( i=1; i<=3; i++ ))
+		do
+			if [[ ${Board[$counter]} == ${Board[$counter+$1+$1]} ]] && [[ ${Board[$counter+$1]} == '-' ]] && [[ ${Board[$counter]} == $3 ]]
+			then
+				computerPosition=$(($counter+$1))
+				Board[$computerPosition]=$3
+				computerWinMove=true
+				break
+			elif [[  ${Board[$counter]} == ${Board[$counter+$1]} ]] && [[  ${Board[$counter+$1+$1]} == '-' ]] && [[ ${Board[$counter]} == $3 ]]
+			then
+				computerPosition=$(($counter+$1+$1))
+				Board[$computerPosition]=$3
+				computerWinMove=true
+				break
+			elif [[ ${Board[$counter+$1]} == ${Board[$counter+$1+$1]} ]] && [[ ${Board[$counter]} == '-' ]] && [[ ${Board[$counter+$1]} == $3 ]]
+			then
+				computerPosition=$counter
+				Board[$computerPosition]=$3
+				computerWinMove=true
+				break
 			fi
-                    loopCounter=$(($loopCounter+1))
-                    position=$(($position+3))
-                 done     
-             }
-		function verticalWinnerCheck(){
-	 		 loopCounter=0
-                 	 position=1
-                        verticalSymbol=$1
-  		        while [  $loopCounter -lt 3 ] 
-                  	do
-				if [[ ${Board[$position]} == ${Board[$(($position+3))]} && 
-                            	${Board[$(($position+3))]} == ${Board[$(($position+6))]} && ${Board[$position]} == $verticalSymbol ]]   
-                  		then 
-                                  displayBoard
-                                         exit 0  #break #exit;;				 
-				#	winnerFlag=1
-             		 	fi
-                    		loopCounter=$(($loopCounter+1))
-                    		position=$(($position+1))
-                	done
+			counter=$(($counter+$2))
+		done
+	fi
+}
 
-	}
-         function diagonalWinnerCheck(){
-	          position=1
-                  diagonalSymbol=$1
-        	   	if [[ ${Board[$position]} == ${Board[$(($position+4))]} && 
-                            ${Board[$(($position+4))]} == ${Board[$(($position+8))]} &&  ${Board[$position]} ==  $verticalSymbol ]] 
-                	then 
-                                 displayBoard
-				exit 0
-			elif [[ ${Board[$position+2]} == ${Board[$(($position+4))]} && 
-                            ${Board[$(($position+4))]} == ${Board[$(($position+6))]} &&  ${Board[$position]} == $verticalSymbol ]]
-                  	then 
-                        displayBoard
-	 	        exit 0
-                fi
-	}  
-        
-	 	function gameTieCheck () {
- 			if [ $gameCount -eq 9 ]
- 			then
- 				
- 				counter="true"
- 			fi
- 		}
+function horizontalAndVerticalWinCheck()
+{
+	position=1
+	loopCounter=1
+	while [  $loopCounter -le 3 ]
+	do
+		if [[ ${Board[$position]} == ${Board[$position+$3]} ]] && [[  ${Board[$position+$3]}  ==  ${Board[$position+$3+$3]} ]] && [[ ${Board[$position+$3+$3]} == $1 ]]
+		then
+			displayBoard
+			echo " $1 won the game "
+			someoneWon=true
+			exit
+			break
+		else
+			position=$(( $position+$2 ))
+		fi
+		loopCounter=$(($loopCounter+1))
+	done
+}
 
-            
-        function checkingForWinner(){
-                 	symbol=$1
-			#playingGame $symbol
-                        horizontalCheck $symbol
-                        verticalWinnerCheck $symbol
-                        diagonalWinnerCheck $symbol
-  			gameTieCheck
-	}    
-      
-           function computerWinningFunctionHorizontally(){
-          
-	 local column=1
-          compWinSymbol=$1         
-	 for((row=1;row<=3;row++))
-         do         
-             if [[  ${Board[$column]} == $compWinSymbol &&  ${Board[$(($column+1))]} == $compWinSymbol  ]]
-             then
-                possibleWinValue=$(($column+2))
-            
-                    
-	     elif [[  ${Board[$column]} == $compWinSymbol &&  ${Board[$(($column+2))]} == $compWinSymbol ]]
-             then
-                  possibleWinValue=$(($column+1))
-          
-             elif [[  ${Board[$(($column+1))]} == $compWinSymbol &&  ${Board[$(($column+2))]} == $compWinSymbol ]]
-             then
- 	           possibleWinValue=$(($column))
-                 
-             fi        
-             column=$(($column+3))
-	 
-         done
-	}
-         function  computerWinningFunctionVertically(){
-                loopCounter=1
-             	position=1
-             	verticalSymbol=$1
-                 while [ $loopCounter -lt 3 ]
-                 do
-                    if [[ ${Board[$position]} == $verticalSymbol && ${Board[$(($position+3))]} == $verticalSymbol ]]
-                    then
-                	     verticalWinValue=$(($position+6))
-                    elif [[ ${Board[$position]} == $verticalSymbol && ${Board[$(($position+6))]} == $verticalSymbol ]]
-                    then
-                     	     verticalWinValue=$(($position+3))
-                   elif [[ ${Board[$(($position+6))]} == $verticalSymbol && ${Board[$(($position+3))]} == $verticalSymbol ]]
-                    then
-                     	     verticalWinValue=$position                 
-                    fi
-                    	    ((loopCounter++))
-                done
-}       
 
-           
-      #function calls
-	
-	initializingBoard
-	assigningAndTossingForSymbol
+
+
+function diagonalWinnerCheck()
+{
+	position=1
+	loopCounter=1
+	while [ $loopCounter -le 2 ]
+	do
+		if [[ ${Board[$position]} == ${Board[$position+4]} ]] && [[  ${Board[$position+4]}  ==  ${Board[$position+8]} ]] && [[ ${Board[$position+8]} == $1 ]]
+		then
+			displayBoard
+			echo "  $1 won the game "
+			someoneWon=true
+			break
+		elif [[ ${Board[$position+2]} == ${Board[$position+4]} ]] && [[  ${Board[$position+4]}  ==  ${Board[$position+6]} ]] && [[ ${Board[$position+6]} == $1 ]]
+		then
+			displayBoard
+			echo " $1 won the game "
+			someoneWon=true
+			break
+		fi
+		loopCounter=$(($loopCounter+1))
+	done
+}
+
+
+function gameTieCheck()
+{
+	while [ ${Board[$nonEmptyBlockCount]} != '-' ]
+	do
+		if [ $nonEmptyBlockCount -eq $MAX_BOARD_POSITION ]
+		then
+			displayBoard
+			echo "Game Is Tied "
+			someoneWon=true
+			computerWinMove=true
+			break
+		else
+			nonEmptyBlockCount=$(($nonEmptyBlockCount+1))
+		fi
+	done
+}
+
+
+
+function checkWon()
+{
+	symbol=$1
+	rowValue=1
+	columnValue=3
+
+	horizontalAndVerticalWinCheck $symbol $columnValue  $rowValue
+ 	horizontalAndVerticalWinCheck $symbol $rowValue $columnValue
+	diagonalWinnerCheck $symbol
+}
+
+
+
+function ticTacToehome(){
+   while [ $someoneWon == false ]
+   do
 	displayBoard
-     
+	if [ $whoPlays == true ]
+	then
+		playerInput
+		checkWon $player
+		gameTieCheck
+	else
+		computerInput
+		checkWon $computer
+		gameTieCheck
+	fi
+
+done
+
+}
+
+
+initializingBoard
+symbolAssignment
+ticTacToehome
+
+
