@@ -77,23 +77,13 @@ function computerInput()
 {
 	echo "Computer is Playing"
        sleep 1
+         computerWinMove=false
           checkingForWinningOrBlockMove $computer
           checkingForWinningOrBlockMove $player
 	  checkingForCorners
           checkingForCenterPosition
-
-	if [ $computerWinMove = false ]
-	then
-		computerPosition=$((RANDOM%9+1))
-		if [[ ${Board[$computerPosition]} != '-' ]]
-		then
-			echo "Computer played Wrong move "
-			computerInput
-		else
-			Board[$computerPosition]=$computer
-		fi
-	fi
-	whoPlays=true
+          checkingForSidePosition
+	  whoPlays=true
 }
 
 
@@ -221,6 +211,23 @@ function checkingForCenterPosition()
    fi
 
 }
+
+function checkingForSidePosition(){
+     if [[ $computerWinMove = false ]]
+     then
+   	for((index=2;index<=$MAX_SIZE;index=$(($index+2))))
+  	do
+        	if [ ${Board[$index]} == '-'  ]
+        	then
+                	computerPosition=$index
+                	Board[$computerPosition]=$computer
+                        computerWinMove=true                	
+			break 
+       fi
+  done
+  fi
+}
+
 
 function gameTieCheck()
 {
