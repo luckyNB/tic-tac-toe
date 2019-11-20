@@ -1,38 +1,31 @@
 #!/bin/bash
-#FINAL_VARIABLES
-MAX_BOARD_POSITION=9
+#Constants
+MAX_SIZE=9
 
 
-#VARIABLES
+#variables
 playerPosition=0
 computerPosition=0
 player=''
 computer=''
 nonEmptyBlockCount=1
 computerWinMove=false
-
-
-
-
-#boolean Flags
 someoneWon=false
-whoPlays=false
+whoPlays=false 
 
-
-#BOARD ARRAY
 declare -a Board
 
 
 function initializingBoard()
 {
-	for (( i=1; i<=$MAX_BOARD_POSITION; i++ ))
+	for (( i=1; i<=$MAX_SIZE; i++ ))
 	do
 		Board[$i]='-'
 	done
 }
 
 
-function symbolAssignment()
+function assigningSymbol()
 {
 	firstPlay=$((RANDOM%2))
 
@@ -41,12 +34,12 @@ function symbolAssignment()
 		whoPlays=true
 		player='X'
 		computer='O'
-		echo "Player symobol : X | Computer symbol : O"
+		echo "Player symobol ====>: X | Computer symbol =====>: O"
 		echo "Player turn First"
 	else
 		player='O'
 		computer='X'
-		echo "Player symobol : O | Computer symbol : X"
+		echo "Player symobol =====>: O | Computer symbol =====> : X"
 		echo "Computer turn First"
 	fi
 }
@@ -55,8 +48,8 @@ function symbolAssignment()
 
 function displayBoard()
 {
-	echo ""
-	for ((row=1; row<=MAX_BOARD_POSITION; row=$(($row+3)) ))
+	echo "_____|_____|_____"
+	for ((row=1; row<=MAX_SIZE; row=$(($row+3)) ))
 	do
 		echo "     |     |      "
 		echo "  ${Board[$row]}  |  ${Board[$row+1]}  |  ${Board[$row+2]}  "
@@ -82,17 +75,12 @@ function playerInput()
 
 function computerInput()
 {
-	rowValue=1
-	columnValue=3
-	leftDiagonalValue=4
-	rightDiagonalValue=2
-	computerWinMove=false
 	echo "Computer is Playing"
-	sleep 1
-	checkWinningMove $rowValue $columnValue $computer
-	checkWinningMove $columnValue $rowValue $computer
-	checkWinningMove $leftDiagonalValue $computer
-	checkWinningMove $rightDiagonalValue $computer
+       sleep 1
+          checkingForWinningOrBlockMove $computer
+          checkingForWinningOrBlockMove $player
+		checkingForCorners
+
 	if [ $computerWinMove = false ]
 	then
 		computerPosition=$((RANDOM%9+1))
@@ -118,19 +106,19 @@ function checkWinningMove()
 			if [[ ${Board[$counter]} == ${Board[$counter+$1+$1]} ]] && [[ ${Board[$counter+$1]} == '-' ]] && [[ ${Board[$counter]} == $3 ]]
 			then
 				computerPosition=$(($counter+$1))
-				Board[$computerPosition]=$3
+				Board[$computerPosition]=$computer
 				computerWinMove=true
 				break
 			elif [[  ${Board[$counter]} == ${Board[$counter+$1]} ]] && [[  ${Board[$counter+$1+$1]} == '-' ]] && [[ ${Board[$counter]} == $3 ]]
 			then
 				computerPosition=$(($counter+$1+$1))
-				Board[$computerPosition]=$3
+				Board[$computerPosition]=$computer
 				computerWinMove=true
 				break
 			elif [[ ${Board[$counter+$1]} == ${Board[$counter+$1+$1]} ]] && [[ ${Board[$counter]} == '-' ]] && [[ ${Board[$counter+$1]} == $3 ]]
 			then
 				computerPosition=$counter
-				Board[$computerPosition]=$3
+				Board[$computerPosition]=$computer
 				computerWinMove=true
 				break
 			fi
@@ -185,12 +173,47 @@ function diagonalWinnerCheck()
 	done
 }
 
+function checkingForWinningOrBlockMove(){
+        rowValue=1
+	columnValue=3
+	leftDiagonalValue=4
+	rightDiagonalValue=2
+
+	checkWinningMove $rowValue $columnValue $1
+	checkWinningMove $columnValue $rowValue $1
+	checkWinningMove $leftDiagonalValue  $1
+	checkWinningMove $rightDiagonalValue  $1
+
+}
+
+
+function checkingForCorners
+{
+	 if [ $computerWinMove = false ]
+   then
+		for((i=1; i<=MAX_BOARD_POSITION; i=$(($i+2)) ))
+		do
+				if [ ${Board[$i]} == '-' ]
+				then
+					computerPosition=$i
+            	Board[$computerPosition]=$computerSymbol
+            	computerWinMove=true
+            break
+				fi
+				if [ $i -eq 3 ]
+				then
+					i=$(($i+2))
+				fi
+		done
+	fi
+}
+
 
 function gameTieCheck()
 {
 	while [ ${Board[$nonEmptyBlockCount]} != '-' ]
 	do
-		if [ $nonEmptyBlockCount -eq $MAX_BOARD_POSITION ]
+		if [ $nonEmptyBlockCount -eq $MAX_SIZE ]
 		then
 			displayBoard
 			echo "Game Is Tied "
@@ -208,12 +231,14 @@ function gameTieCheck()
 function checkWon()
 {
 	symbol=$1
+        
 	rowValue=1
 	columnValue=3
-
-	horizontalAndVerticalWinCheck $symbol $columnValue  $rowValue
+          
+	horizontalAndVerticalWinCheck $symbol $columnValue $rowValue
  	horizontalAndVerticalWinCheck $symbol $rowValue $columnValue
 	diagonalWinnerCheck $symbol
+      
 }
 
 
@@ -225,11 +250,11 @@ function ticTacToehome(){
 	if [ $whoPlays == true ]
 	then
 		playerInput
-		checkWon $player
+		checkWon $player 
 		gameTieCheck
 	else
 		computerInput
-		checkWon $computer
+		checkWon $computer 
 		gameTieCheck
 	fi
 
@@ -239,7 +264,5 @@ done
 
 
 initializingBoard
-symbolAssignment
+assigningSymbol
 ticTacToehome
-
-
