@@ -1,9 +1,9 @@
 #!/bin/bash
-#FINAL_VARIABLES
+#Constants
 MAX_SIZE=9
 
 
-#VARIABLES
+#variables
 playerPosition=0
 computerPosition=0
 player=''
@@ -75,17 +75,12 @@ function playerInput()
 
 function computerInput()
 {
-	rowValue=1
-	columnValue=3
-	leftDiagonalValue=4
-	rightDiagonalValue=2
-	computerWinMove=false
 	echo "Computer is Playing"
-	sleep 1
-	checkWinningMove $rowValue $columnValue $computer
-	checkWinningMove $columnValue $rowValue $computer
-	checkWinningMove $leftDiagonalValue $computer
-	checkWinningMove $rightDiagonalValue $computer
+       sleep 1
+          checkingForWinningOrBlockMove $computer
+          checkingForWinningOrBlockMove $player
+		
+
 	if [ $computerWinMove = false ]
 	then
 		computerPosition=$((RANDOM%9+1))
@@ -111,19 +106,19 @@ function checkWinningMove()
 			if [[ ${Board[$counter]} == ${Board[$counter+$1+$1]} ]] && [[ ${Board[$counter+$1]} == '-' ]] && [[ ${Board[$counter]} == $3 ]]
 			then
 				computerPosition=$(($counter+$1))
-				Board[$computerPosition]=$3
+				Board[$computerPosition]=$computer
 				computerWinMove=true
 				break
 			elif [[  ${Board[$counter]} == ${Board[$counter+$1]} ]] && [[  ${Board[$counter+$1+$1]} == '-' ]] && [[ ${Board[$counter]} == $3 ]]
 			then
 				computerPosition=$(($counter+$1+$1))
-				Board[$computerPosition]=$3
+				Board[$computerPosition]=$computer
 				computerWinMove=true
 				break
 			elif [[ ${Board[$counter+$1]} == ${Board[$counter+$1+$1]} ]] && [[ ${Board[$counter]} == '-' ]] && [[ ${Board[$counter+$1]} == $3 ]]
 			then
 				computerPosition=$counter
-				Board[$computerPosition]=$3
+				Board[$computerPosition]=$computer
 				computerWinMove=true
 				break
 			fi
@@ -178,14 +173,25 @@ function diagonalWinnerCheck()
 	done
 }
 
-functio
+function checkingForWinningOrBlockMove(){
+        rowValue=1
+	columnValue=3
+	leftDiagonalValue=4
+	rightDiagonalValue=2
+
+	checkWinningMove $rowValue $columnValue $1
+	checkWinningMove $columnValue $rowValue $1
+	checkWinningMove $leftDiagonalValue  $1
+	checkWinningMove $rightDiagonalValue  $1
+
+}
 
 
 function gameTieCheck()
 {
 	while [ ${Board[$nonEmptyBlockCount]} != '-' ]
 	do
-		if [ $nonEmptyBlockCount -eq $MAX_BOARD_POSITION ]
+		if [ $nonEmptyBlockCount -eq $MAX_SIZE ]
 		then
 			displayBoard
 			echo "Game Is Tied "
@@ -206,7 +212,7 @@ function checkWon()
         
 	rowValue=1
 	columnValue=3
-           #for win to com
+          
 	horizontalAndVerticalWinCheck $symbol $columnValue $rowValue
  	horizontalAndVerticalWinCheck $symbol $rowValue $columnValue
 	diagonalWinnerCheck $symbol
@@ -222,11 +228,11 @@ function ticTacToehome(){
 	if [ $whoPlays == true ]
 	then
 		playerInput
-		checkWon $player $computer
+		checkWon $player 
 		gameTieCheck
 	else
 		computerInput
-		checkWon $computer $computer
+		checkWon $computer 
 		gameTieCheck
 	fi
 
