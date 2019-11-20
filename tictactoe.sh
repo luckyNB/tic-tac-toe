@@ -79,7 +79,8 @@ function computerInput()
        sleep 1
           checkingForWinningOrBlockMove $computer
           checkingForWinningOrBlockMove $player
-		checkingForCorners
+	  checkingForCorners
+          checkingForCenterPosition
 
 	if [ $computerWinMove = false ]
 	then
@@ -208,6 +209,18 @@ function checkingForCorners
 	fi
 }
 
+
+function checkingForCenterPosition()
+{
+	center=5
+	if [[ $computerWinMove = false ]] && [[ ${boardPosition[$middle]} == '-' ]]
+	then
+					computerPosition=$center
+               Board[$computerPosition]=$computerSymbol
+               computerWinMove=true
+   fi
+
+}
 
 function gameTieCheck()
 {
