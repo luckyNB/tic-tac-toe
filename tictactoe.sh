@@ -178,7 +178,7 @@ function checkingForWinningOrBlockMove(){
 }
 
 
-function checkingForCorners
+function checkingForCorners()
 {
 	 if [ $computerWinMove = false ]
    then
@@ -263,7 +263,7 @@ function checkWon()
 
 
 
-function ticTacToehome(){
+function ticTacToeHome(){
    while [ $someoneWon == false ]
    do
 	displayBoard
@@ -285,4 +285,4 @@ done
 
 initializingBoard
 assigningSymbol
-ticTacToehome
+ticTacToeHome
