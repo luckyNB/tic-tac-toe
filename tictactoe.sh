@@ -76,14 +76,26 @@ function playerInput()
 function computerInput()
 {
 	echo "Computer is Playing"
-       sleep 1
+       sleep   1
          computerWinMove=false
           checkingForWinningOrBlockMove $computer
-          checkingForWinningOrBlockMove $player
-	  checkingForCorners
-          checkingForCenterPosition
-          checkingForSidePosition
-	  whoPlays=true
+            if [ $computerWinMove == false ]
+            then
+          	checkingForWinningOrBlockMove $player
+            fi
+	    if [ $computerWinMove == false ]
+            then
+            	checkingForCorners
+            fi
+            if [ $computerWinMove == false ]
+            then
+ 	   	checkingForCenterPosition
+            fi
+            if [ $computerWinMove == false ]
+	    then
+          	checkingForSidePosition
+	    fi 
+	    whoPlays=true
 }
 
 
